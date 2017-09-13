@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -11,9 +12,12 @@ namespace pWonders
 	{
 		public static string GetUniqueName()
 		{
-			AssemblyName an = Assembly.GetExecutingAssembly().GetName();
-			string name = an.Name + "-";
-			object[] attribs = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(GuidAttribute), false);
+			Assembly asm = Assembly.GetExecutingAssembly();
+			string path = asm.Location;
+			AssemblyName an = asm.GetName();
+			string prefix = (string.IsNullOrEmpty(path) == false) ? Path.GetFileName(path) : an.Name;
+			string name = prefix + "-";
+			object[] attribs = asm.GetCustomAttributes(typeof(GuidAttribute), false);
 			if (attribs.Length > 0)
 			{
 				name += (attribs[0] as GuidAttribute).Value.Replace("-", "");
