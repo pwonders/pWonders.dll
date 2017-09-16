@@ -10,14 +10,13 @@ namespace pWonders
 {
 	public class SingleInstance
 	{
-		public static string GetUniqueName()
+		public static string GetUniqueName(Assembly assembly)
 		{
-			Assembly asm = Assembly.GetExecutingAssembly();
-			string path = asm.Location;
-			AssemblyName an = asm.GetName();
+			string path = assembly.Location;
+			AssemblyName an = assembly.GetName();
 			string prefix = (string.IsNullOrEmpty(path) == false) ? Path.GetFileName(path) : an.Name;
 			string name = prefix + "-";
-			object[] attribs = asm.GetCustomAttributes(typeof(GuidAttribute), false);
+			object[] attribs = assembly.GetCustomAttributes(typeof(GuidAttribute), false);
 			if (attribs.Length > 0)
 			{
 				name += (attribs[0] as GuidAttribute).Value.Replace("-", "");
@@ -39,10 +38,10 @@ namespace pWonders
 
 		// See also:
 		// https://stackoverflow.com/questions/229565/what-is-a-good-pattern-for-using-a-global-mutex-in-c/229567
-		public SingleInstance(Action func)
+		public SingleInstance(Action func, Assembly assembly)
 		{
 			bool createdNew;
-			using (var mutex = new Mutex(false, GetUniqueName(), out createdNew))
+			using (var mutex = new Mutex(false, GetUniqueName(assembly), out createdNew))
 			{
 				if (createdNew)
 				{
